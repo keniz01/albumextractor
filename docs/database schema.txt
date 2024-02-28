@@ -1,0 +1,36 @@
+artist
+id primary key serial int not null
+name unique varchar 255 not null
+
+genre
+id primary key serial int not null
+name unique varchar 255 not null
+
+label
+id primary key serial int not null
+name unique varchar 255 not null
+
+album
+id primary key serial int not null
+title unique varchar 255 not null
+duration time
+total_songs int
+year int
+genre foreign key
+label foreign key
+artist foreign key
+
+song
+id primary key serial int not null
+title unique varchar 255 not null
+duration time
+position int
+year int
+genre foreign key
+label foreign key
+artist foreign key
+
+
+Use SqlAlchemy to create database structure and alembic for migrations
+
+

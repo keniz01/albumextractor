@@ -1,0 +1,19 @@
+Get parent folder - this folder includes albums folders and album folders include songs
+For each album folder, collect all mps files
+For each mp3 file, extract metadata using mutagen
+For each artist
+    query table for artist matching metadata, 
+        if found skip 
+        else insert record
+For each album
+    query table for album matching metadata, 
+        if found skip 
+        else insert record
+For each genre
+    query table for genre matching metadata, 
+        if found skip 
+        else insert record
+For each label
+    query table for artist matching metadata, 
+        if found skip 
+        else insert record                
