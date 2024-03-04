@@ -14,7 +14,8 @@ class Album(Base):
     title = Column(String, nullable=False, unique=True)
     duration = Column(String)
     total_songs = Column(Integer)
-    year = Column = (String)
+    year = Column(Integer)
+    total_dics = Column(Integer)
 
     artist_id = Column(Integer, ForeignKey('artists.id'))
     artist = relationship("Artist", back_populates="albums")
