@@ -1,12 +1,12 @@
 '''
 Program entry - main.py.
 '''
-import filetype
 from pathlib import Path
 import sys
 from infrastructure.database_manager import DatabaseManger as dm
-import mutagen
 from tinytag import TinyTag 
+from mutagen.easyid3 import EasyID3
+from mutagen.mp3 import MP3
 
 def run():
     '''
@@ -18,6 +18,14 @@ def run():
         1.4 Model extract meta data into domain model
         1.5 Insert data model into database
     '''
+
+    def format_duration(total_length: int) -> str:
+        mins, secs = divmod(total_length, 60)
+        mins = round(mins)
+        secs = round(secs)
+        time_format = '{:02d}:{:02d}'.format(mins, secs)
+        return time_format
+
     root_folder = sys.argv[1]
 
     print('Root path: ', root_folder)
@@ -48,21 +56,27 @@ def run():
                     print(f"Duration: {audio.duration:.2f} seconds") 
                     print(f"DiscNo: {audio.dics}") 
         else:
-            file_type = filetype.guess(path)
 
-            if file_type.extension != 'mp3':
+            if path.suffix != '.mp3':
                 continue;
+            for key in EasyID3.valid_keys.keys():
+                print(key)
 
-            audio = TinyTag.get(path)
-            print(f"track_total: {audio.track_total}")
-            print(f"total_discs: {audio.disc_total}")
-            print(f"album: {audio.album}")
-            print(f"Title: {audio.title}")
-            print(f"Genre: {audio.genre}") 
-            print(f"TrackNo: {audio.track}") 
-            print(f"Year Released: {audio.year}") 
-            print(f"Duration: {audio.duration:.2f} seconds") 
+            audio = MP3(path, ID3=EasyID3)
 
+            audio.pprint()
+            print(audio.info.length)
+            print(audio.info.bitrate)
+
+            # audio = TinyTag.get(path)
+            # print(f"track_total: {audio.track_total}")
+            # print(f"total_discs: {audio.disc_total}")
+            # print(f"album: {audio.album}")
+            # print(f"Title: {audio.title}")
+            # print(f"Genre: {audio.genre}") 
+            # print(f"TrackNo: {audio.track}") 
+            # print(f"Year Released: {audio.year}") 
+            # print(f"Duration: {format_duration(audio.duration)}")
 
 if __name__ == "__main__":
     run()
