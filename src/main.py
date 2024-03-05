@@ -5,8 +5,7 @@ from pathlib import Path
 import sys
 from infrastructure.database_manager import DatabaseManger as dm
 from tinytag import TinyTag 
-from mutagen.easyid3 import EasyID3
-from mutagen.mp3 import MP3
+from domain.entities.audio_library import AudioComposition
 
 def run():
     '''
@@ -31,7 +30,9 @@ def run():
     print('Root path: ', root_folder)
 
     root = Path(root_folder)
-    for path in root.rglob('*'):  # '*' pattern for all files and directories
+
+    library = AudioComposition()
+    for index, path in enumerate(root.rglob('*')):  # '*' pattern for all files and directories
         if path.is_dir():
             files = [file for file in path.rglob('*.mp3')]
             
@@ -59,16 +60,25 @@ def run():
 
             if path.suffix != '.mp3':
                 continue;
-            for key in EasyID3.valid_keys.keys():
-                print(key)
 
-            audio = MP3(path, ID3=EasyID3)
+            audio = TinyTag.get(path)
 
-            audio.pprint()
-            print(audio.info.length)
-            print(audio.info.bitrate)
+            if index == 0:
+                library.add_album(
+                    title=audio.album,
+                    duration=None,
+                    year=audio.year,
+                    track_total=audio.track_total
+                )
 
-            # audio = TinyTag.get(path)
+            library.add_track(
+                title=audio.title,
+                duration=format_duration(audio.duration),
+                year=audio.year,
+                position=audio.track
+            )
+
+            library.add_genre(name=audio.genre)
             # print(f"track_total: {audio.track_total}")
             # print(f"total_discs: {audio.disc_total}")
             # print(f"album: {audio.album}")
@@ -77,6 +87,8 @@ def run():
             # print(f"TrackNo: {audio.track}") 
             # print(f"Year Released: {audio.year}") 
             # print(f"Duration: {format_duration(audio.duration)}")
+
+    print(library)
 
 if __name__ == "__main__":
     run()
