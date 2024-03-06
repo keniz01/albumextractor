@@ -1,37 +1,44 @@
-'''
-Program entry - main.py.
-'''
 from pathlib import Path
 import sys
-from infrastructure.database_manager import DatabaseManger as dm
 from tinytag import TinyTag 
-from domain.entities.audio_library import AudioComposition
+from typing import List
+
+def format_duration(total_length: int) -> str:
+    mins, secs = divmod(total_length, 60)
+    mins = round(mins)
+    secs = round(secs)
+    time_format = '{:02d}:{:02d}'.format(mins, secs)
+    return time_format
+
+class Album():
+    def __init__(self, title: str, duration: str, total_tracks: int, year: int) -> None:
+        self.title = title
+        self.duration = format_duration(duration)
+        self.total_tracks = total_tracks
+        self.year = year
+
+class Track():
+    def __init__(self, title: str, duration: str, position: int, year: int) -> None:
+        self.title = title
+        self.duration = format_duration(duration)
+        self.position = position
+        self.year = year
+
+class Compilation():
+    def __init__(self) -> None:
+        self.album = Album()
+        self.tracks = List[Track]
+
+    def add_album(self, album: Album):
+        self.album = album
+    
+    def add_track(self, track: Track):
+        self.tracks.append(track)
 
 def run():
-    '''
-    Triggers/starts the extraction process.
-    1. Prompt for file parent folder.
-        1.1 Scan parent folder for sub folders (recursive)
-        1.2 Scand for files (mp3, wma)
-        1.3 For each file, extract meta data
-        1.4 Model extract meta data into domain model
-        1.5 Insert data model into database
-    '''
-
-    def format_duration(total_length: int) -> str:
-        mins, secs = divmod(total_length, 60)
-        mins = round(mins)
-        secs = round(secs)
-        time_format = '{:02d}:{:02d}'.format(mins, secs)
-        return time_format
-
     root_folder = sys.argv[1]
-
-    print('Root path: ', root_folder)
-
     root = Path(root_folder)
 
-    library = AudioComposition()
     for index, path in enumerate(root.rglob('*')):  # '*' pattern for all files and directories
         if path.is_dir():
             files = [file for file in path.rglob('*.mp3')]
