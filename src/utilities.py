@@ -1,5 +1,7 @@
 class DateTimeUtilities():
+    
     def format_duration(total_length: float) -> str:
+       
         minutes, seconds = divmod(total_length, 60)
         hours, minutes = divmod(minutes, 60)
 
