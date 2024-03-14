@@ -1,0 +1,5 @@
+USERNAME=user_name
+PASSWORD=password
+SERVER=server_name
+PORT=port_number
+DATABASE=database_name
