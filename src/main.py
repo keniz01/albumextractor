@@ -51,7 +51,7 @@ def run():
 
     path = Path(folder_path)
 
-    files = path.rglob("**/*.mp3")
+    files = path.rglob("*.mp3")
 
     audio_tags = [TinyTag.get(file) for file in files]
     albums = [{
