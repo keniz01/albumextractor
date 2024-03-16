@@ -30,7 +30,18 @@ genre foreign key
 label foreign key
 artist foreign key
 
-
 Use SqlAlchemy to create database structure and alembic for migrations
+
+staging database
+----------------
+id (integer, primary key, auto-increment)
+artist_name (string, nullable)
+album_title (string, nullable)   
+track_title (string, nullable)
+track_length (string, nullable)
+genre_name = (string, nullable)
+track_position (integer, nullable)
+track_total (integer, nullable)
+track_year (integer, nullable)
 
 
