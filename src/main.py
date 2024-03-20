@@ -44,6 +44,18 @@ class Song(Base):
  
 Base.metadata.create_all(engine)
 
+def sanitize_data(data, data_type):
+
+    def strip_characters(data):
+        return data.replace('\0x00', '').replace('\0', '').strip()
+    
+    if data_type == str:
+        return strip_characters(data) if(data) else ""
+    elif data_type == int or data_type == float:
+        return data if(data) else 0
+    else:
+        return data
+
 def run():
     # Get file path
     folder_path = sys.argv[1]
@@ -64,19 +76,19 @@ def run():
             print(f"Failed to process ==> {file.name}")
 
     albums = [{
-        "artist_name": tag.artist if tag.artist is not None else "",
-        "album_title": tag.album if tag.album is not None else "",
-        "track_title": tag.title if tag.title is not None else "", 
-        "track_length": utils.format_duration(tag.duration) if tag.duration is not None else 0.0,
-        "genre_name": tag.genre if tag.genre is not None else "",
-        "track_position": tag.track if tag.track else 0,
-        "track_year": tag.year if tag.year else 0,        
+        "artist_name": sanitize_data(tag.artist, str),
+        "album_title": sanitize_data(tag.album, str),
+        "track_title": sanitize_data(tag.title, str), 
+        "track_length": utils.format_duration(sanitize_data(tag.duration, float)),
+        "genre_name": sanitize_data(tag.genre, str),
+        "track_position": sanitize_data(tag.track, int),
+        "track_year": sanitize_data(tag.year, int),        
     } for tag in audio_tags]
 
     def insert_on_conflict_nothing(table, conn, keys, data_iter):
         data = [dict(zip(keys, row)) for row in data_iter]
         stmt = insert(table.table).values(data).on_conflict_do_nothing(index_elements=['artist_name', 'album_title', 'track_title'])
-        print(stmt)
+        print(data)
         result = conn.execute(stmt)       
         return result.rowcount
     
