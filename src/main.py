@@ -1,4 +1,4 @@
-import itertools
+from itertools import chain
 from pathlib import Path
 import sys
 from psycopg2 import OperationalError
@@ -10,7 +10,8 @@ import pandas as pd
 from utilities import DateTimeUtilities as utils
 from dotenv import load_dotenv
 import os
-import time
+from time import time
+import concurrent.futures
 
 # Load environment variables.
 load_dotenv()
@@ -24,7 +25,7 @@ database = os.getenv("DATABASE")
 DATABASE_URL = f'postgresql://{username}:{password}@{server}:{port}/{database}'
 
 try:
-    engine = create_engine(DATABASE_URL, echo=True)
+    engine = create_engine(DATABASE_URL)
 except OperationalError as error:
     print(f"Error: {error.pgerror}")
 
@@ -59,28 +60,25 @@ def sanitize_data(data, data_type):
 
 def run():
     # Get file path
-    folder_path = sys.argv[1]
-    print(f"\n =========> Extracting files from ${folder_path} <===========\n")
-
+    folder_path = sys.argv[1]    
     path = Path(folder_path)
+    print(f"\n1. Extracting files from {path.absolute()} .............", end="")
+    start_time = time()
+    files = chain(path.rglob("*.mp3"),path.rglob("*.wma"))
+    print("DONE")
 
-    start_time = time.time()
-    files = itertools.chain(path.rglob("*.mp3"),path.rglob("*.wma"))
-    stop_time = time.time()
-    print(f"Files read in {utils.format_duration(stop_time - start_time)}")
+    def read_file_tags(file: Path):   
+            try:
+                return TinyTag.get(file)
+            except TinyTagException:
+                print(f"Failed to extract ID3 tags from:  {file.name}")
 
-    audio_tags = []
-    
-    print("\n Extracting tags ======================================> ")
-    for file in files:
-        try:
-            audio_tag = TinyTag.get(file)
-            audio_tags.append(audio_tag)
-        except TinyTagException:
-            print(f"Cannot extract ID3 tags for:  {file.name}")
-
-    print("Extracted tags ======================================> ")
-
+    print("\n2. Extracting tags from files.......... ", end="")
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        audio_tags = list(executor.map(read_file_tags, files))
+        print("DONE")
+        
+    print("\n3. Creating album collection .............", end="")
     albums = [{
         "artist_name": sanitize_data(tag.artist, str),
         "album_title": sanitize_data(tag.album, str),
@@ -90,8 +88,7 @@ def run():
         "track_position": sanitize_data(tag.track, int),
         "track_year": sanitize_data(tag.year, int),        
     } for tag in audio_tags]
-
-    print("Album collection created.")
+    print("DONE")
 
     def insert_on_conflict_nothing(table, conn, keys, data_iter):
         data = [dict(zip(keys, row)) for row in data_iter]
@@ -100,12 +97,13 @@ def run():
         return result.rowcount
     
     df = pd.DataFrame(albums).fillna("")
-    print("<=================================== Data frame created.")
 
-    df.to_sql('tbl_song', engine, if_exists='append', index=False, method=insert_on_conflict_nothing)
+    print("\n4. Saving to database ........", end="")
+    row_count = df.to_sql('tbl_song', engine, if_exists='append', index=False, method=insert_on_conflict_nothing)
+    print("DONE") if row_count > 0 else print("Nothing to save")
 
-    stop_time = time.time()
-    print(f"Processed {len(albums)} files in {utils.format_duration(stop_time - start_time)} minutes.")
+    stop_time = time()
+    print(f"\nProcessed {len(albums)} files in {utils.format_duration(stop_time - start_time)} minutes.")
     
 if __name__ == "__main__":
     run()
