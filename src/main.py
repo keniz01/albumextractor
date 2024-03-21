@@ -36,7 +36,7 @@ class Song(Base):
 
     id = Column(Integer, primary_key=True, autoincrement="auto")
     artist_name = Column(String, nullable=True)
-    album_title = Column(String, nullable=True)   
+    album_title = Column(String, nullable=True)
     track_title = Column(String, nullable=True)
     track_length = Column(String, nullable=True)
     genre_name = Column(String, nullable=True)
@@ -76,10 +76,10 @@ def run():
     print("DONE")
 
     def read_file_tags(file: Path):   
-            try:
-                return TinyTag.get(file)
-            except TinyTagException:
-                print(f"\n\tFailed to extract ID3 tags from:  {file.name}")
+        try:
+            return TinyTag.get(file)
+        except TinyTagException:
+            print(f"\n\tFailed to extract ID3 tags from:  {file.name}")
 
     print("\n2. Extracting tags from files.......... ", end="")
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
