@@ -1,3 +1,4 @@
+import itertools
 from pathlib import Path
 import sys
 from psycopg2 import OperationalError
@@ -23,7 +24,7 @@ database = os.getenv("DATABASE")
 DATABASE_URL = f'postgresql://{username}:{password}@{server}:{port}/{database}'
 
 try:
-    engine = create_engine(DATABASE_URL)
+    engine = create_engine(DATABASE_URL, echo=True)
 except OperationalError as error:
     print(f"Error: {error.pgerror}")
 
@@ -52,28 +53,33 @@ def sanitize_data(data, data_type):
     if data_type == str:
         return strip_characters(data) if(data) else ""
     elif data_type == int or data_type == float:
-        return data if(data) else 0
+        return data if(str(data).strip()) else 0
     else:
         return data
 
 def run():
     # Get file path
     folder_path = sys.argv[1]
-    print(f"\nScanning ${folder_path} for music files ...... \n")
+    print(f"\n =========> Extracting files from ${folder_path} <===========\n")
 
     path = Path(folder_path)
 
     start_time = time.time()
-    files = path.rglob("*.mp3")
+    files = itertools.chain(path.rglob("*.mp3"),path.rglob("*.wma"))
+    stop_time = time.time()
+    print(f"Files read in {utils.format_duration(stop_time - start_time)}")
 
     audio_tags = []
     
+    print("\n Extracting tags ======================================> ")
     for file in files:
         try:
             audio_tag = TinyTag.get(file)
             audio_tags.append(audio_tag)
         except TinyTagException:
-            print(f"Failed to process ==> {file.name}")
+            print(f"Cannot extract ID3 tags for:  {file.name}")
+
+    print("Extracted tags ======================================> ")
 
     albums = [{
         "artist_name": sanitize_data(tag.artist, str),
@@ -85,14 +91,17 @@ def run():
         "track_year": sanitize_data(tag.year, int),        
     } for tag in audio_tags]
 
+    print("Album collection created.")
+
     def insert_on_conflict_nothing(table, conn, keys, data_iter):
         data = [dict(zip(keys, row)) for row in data_iter]
         stmt = insert(table.table).values(data).on_conflict_do_nothing(index_elements=['artist_name', 'album_title', 'track_title'])
-        print(data)
         result = conn.execute(stmt)       
         return result.rowcount
     
-    df = pd.DataFrame(albums)
+    df = pd.DataFrame(albums).fillna("")
+    print("<=================================== Data frame created.")
+
     df.to_sql('tbl_song', engine, if_exists='append', index=False, method=insert_on_conflict_nothing)
 
     stop_time = time.time()
