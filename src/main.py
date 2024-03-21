@@ -51,10 +51,12 @@ def sanitize_data(data, data_type):
     def strip_characters(data):
         return data.replace('\0x00', '').replace('\0', '').strip()
     
-    if data_type == str:
+    if data_type is str:
         return strip_characters(data) if(data) else ""
-    elif data_type == int or data_type == float:
-        return data if(str(data).strip()) else 0
+    elif data_type is int or data_type is float:
+        data = 0 if data is None else data
+        data = str(data).strip() if type(data) == str else data
+        return data if(data) else 0
     else:
         return data
 
