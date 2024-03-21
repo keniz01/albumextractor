@@ -79,7 +79,7 @@ def run():
             try:
                 return TinyTag.get(file)
             except TinyTagException:
-                print(f"Failed to extract ID3 tags from:  {file.name}")
+                print(f"\n\tFailed to extract ID3 tags from:  {file.name}")
 
     print("\n2. Extracting tags from files.......... ", end="")
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
@@ -94,7 +94,7 @@ def run():
         "track_length": utils.format_duration(sanitize_data(tag.duration, float)),
         "genre_name": sanitize_data(tag.genre, str),
         "track_position": sanitize_data(tag.track, int),
-        "track_year": sanitize_data("198X", int),        
+        "track_year": sanitize_data(tag.year, int),        
     } for tag in audio_tags]
     print("DONE")
 
