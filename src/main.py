@@ -87,21 +87,37 @@ def run():
             print(f"\n\tFailed to extract ID3 tags from:  {file.name}")
 
     print("\n2. Extracting tags from files.......... ", end="")
+    # with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+    #     audio_tags = list(executor.map(read_file_tags, files))
+    #     print("DONE")
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
         audio_tags = list(executor.map(read_file_tags, files))
-        print("DONE")
+        for future in concurrent.futures.as_completed(audio_tags):
+            result = future.result()
+            print(result)
+        print("DONE")    
         
-    print("\n3. Creating album collection .............", end="")
-    albums = [{
-        "artist_name": sanitize_data(tag.artist, str),
-        "album_title": sanitize_data(tag.album, str),
-        "track_title": sanitize_data(tag.title, str), 
-        "track_length": utils.format_duration(sanitize_data(tag.duration, float)),
-        "genre_name": sanitize_data(tag.genre, str),
-        "track_position": sanitize_data(tag.track, int),
-        "track_year": sanitize_data(tag.year, int),        
-    } for tag in audio_tags]
-    print("DONE")
+    # Create a ProcessPoolExecutor with maximum 2 worker processes
+    with concurrent.futures.ProcessPoolExecutor(max_workers=2) as executor:
+        # Submit tasks to the executor
+        results = [executor.submit(task, i) for i in range(5)]
+        
+        # Retrieve results as they become available
+        for future in concurrent.futures.as_completed(results):
+            result = future.result()
+            print(result)            
+        
+        print("\n3. Creating album collection .............", end="")
+        albums = [{
+            "artist_name": sanitize_data(tag.artist, str),
+            "album_title": sanitize_data(tag.album, str),
+            "track_title": sanitize_data(tag.title, str), 
+            "track_length": utils.format_duration(sanitize_data(tag.duration, float)),
+            "genre_name": sanitize_data(tag.genre, str),
+            "track_position": sanitize_data(tag.track, int),
+            "track_year": sanitize_data(tag.year, int),        
+        } for tag in audio_tags]
+        print("DONE")
 
     def insert_on_conflict_nothing(table, conn, keys, data_iter):
         data = [dict(zip(keys, row)) for row in data_iter]
