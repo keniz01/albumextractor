@@ -75,9 +75,14 @@ def run():
     files = chain(path.rglob("*.mp3"),path.rglob("*.wma"))
     print("DONE")
 
-    def read_file_tags(file: Path):   
+    def read_file_tags(file: Path) -> TinyTag:   
         try:
-            return TinyTag.get(file)
+            tag = TinyTag.get(file)
+            
+            if tag is not None:
+                return tag
+            
+            raise TinyTagException()
         except TinyTagException:
             print(f"\n\tFailed to extract ID3 tags from:  {file.name}")
 
