@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 import os
 from time import time
 import concurrent.futures
+import taglib
 
 # Load environment variables.
 load_dotenv()
@@ -66,6 +67,15 @@ def sanitize_data(data, data_type):
     else:
         return data
 
+def read_file_tags(file: Path) -> TinyTag:   
+    try:
+        t = taglib.File(file)
+        print(t)
+
+        return TinyTag.get(file)
+    except TinyTagException:
+        print(f"\n\tFailed to extract ID3 tags from:  {file.name}")
+            
 def run():
     # Get file path
     folder_path = sys.argv[1]    
@@ -75,40 +85,22 @@ def run():
     files = chain(path.rglob("*.mp3"),path.rglob("*.wma"))
     print("DONE")
 
-    def read_file_tags(file: Path) -> TinyTag:   
-        try:
-            tag = TinyTag.get(file)
-            
-            if tag is not None:
-                return tag
-            
-            raise TinyTagException()
-        except TinyTagException:
-            print(f"\n\tFailed to extract ID3 tags from:  {file.name}")
-
     print("\n2. Extracting tags from files.......... ", end="")
-    # with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-    #     audio_tags = list(executor.map(read_file_tags, files))
-    #     print("DONE")
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-        audio_tags = list(executor.map(read_file_tags, files))
-        for future in concurrent.futures.as_completed(audio_tags):
-            result = future.result()
-            print(result)
+        futures = [executor.submit(read_file_tags, file) for file in files]
+        audio_tags = [future.result() for future in concurrent.futures.as_completed(futures)]
         print("DONE")    
-        
-    # Create a ProcessPoolExecutor with maximum 2 worker processes
-    with concurrent.futures.ProcessPoolExecutor(max_workers=2) as executor:
-        # Submit tasks to the executor
-        results = [executor.submit(task, i) for i in range(5)]
-        
-        # Retrieve results as they become available
-        for future in concurrent.futures.as_completed(results):
-            result = future.result()
-            print(result)            
-        
-        print("\n3. Creating album collection .............", end="")
-        albums = [{
+
+    print("\n3. Creating album collection .............", end="")
+
+    albums = []
+    for tag in audio_tags:
+
+        if not tag:
+            continue
+
+        album = {
             "artist_name": sanitize_data(tag.artist, str),
             "album_title": sanitize_data(tag.album, str),
             "track_title": sanitize_data(tag.title, str), 
@@ -116,8 +108,11 @@ def run():
             "genre_name": sanitize_data(tag.genre, str),
             "track_position": sanitize_data(tag.track, int),
             "track_year": sanitize_data(tag.year, int),        
-        } for tag in audio_tags]
-        print("DONE")
+        }
+
+        albums.append(album)
+
+    print("DONE")
 
     def insert_on_conflict_nothing(table, conn, keys, data_iter):
         data = [dict(zip(keys, row)) for row in data_iter]
