@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 import os
 from time import time
 import concurrent.futures
-import taglib
+from mutagen.mp3 import MP3
 
 # Load environment variables.
 load_dotenv()
@@ -67,10 +67,10 @@ def sanitize_data(data, data_type):
     else:
         return data
 
-def read_file_tags(file: Path) -> TinyTag:   
+def read_file_tags(file: Path) -> MP:   
     try:
-        t = taglib.File(file)
-        print(t)
+        audio = MP3(file)
+        print(audio)
 
         return TinyTag.get(file)
     except TinyTagException:
