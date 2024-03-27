@@ -67,13 +67,11 @@ def sanitize_data(data, data_type):
     else:
         return data
 
-def read_file_tags(file: Path) -> MP:   
+def read_file_tags(file: Path) -> MP3:   
     try:
-        audio = MP3(file)
-        print(audio)
-
-        return TinyTag.get(file)
-    except TinyTagException:
+        return MP3(file)
+    except Exception as error:
+        print(error)
         print(f"\n\tFailed to extract ID3 tags from:  {file.name}")
             
 def run():
@@ -101,13 +99,13 @@ def run():
             continue
 
         album = {
-            "artist_name": sanitize_data(tag.artist, str),
-            "album_title": sanitize_data(tag.album, str),
-            "track_title": sanitize_data(tag.title, str), 
-            "track_length": utils.format_duration(sanitize_data(tag.duration, float)),
-            "genre_name": sanitize_data(tag.genre, str),
-            "track_position": sanitize_data(tag.track, int),
-            "track_year": sanitize_data(tag.year, int),        
+            "artist_name": tag["TPE1"].text[0] if "TPE1" in tag else tag["TPE2"].text[0] if "TPE2" in tag else "",
+            "album_title": tag["TALB"].text[0] if "TALB" in tag else "",
+            "track_title": tag["TIT2"].text[0] if "TIT2" in tag else "", 
+            "track_length": utils.format_duration(tag["TLEN"].text[0]) if "TLEN" in tag else 0,
+            "genre_name": tag["TCON"].text[0] if "TCON" in tag else "",
+            "track_position": tag["TRCK"].text[0] if "TRCK" in tag else 0,
+            "track_year": tag["TORY"].text[0] if "TORY" in tag else 0,        
         }
 
         albums.append(album)
