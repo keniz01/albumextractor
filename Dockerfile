@@ -1,11 +1,4 @@
 # syntax=docker/dockerfile:1
-
-# Comments are provided throughout this file to help you get started.
-# If you need more help, visit the Dockerfile reference guide at
-# https://docs.docker.com/go/dockerfile-reference/
-
-# Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
-
 ARG PYTHON_VERSION=3.10.4
 FROM python:${PYTHON_VERSION}-slim as compiler
 
@@ -33,7 +26,12 @@ RUN adduser \
 RUN python -m venv /opt/venv
 # Enable venv
 ENV PATH="/opt/venv/bin:$PATH"
+ENV PATH="$PATH:/Library/PostgreSQL/16/bin"
 RUN python -m pip install --upgrade pip
+
+RUN apt-get update \
+    && apt-get -y install libpq-dev gcc
+# EXPORT PATH="/Library/PostgreSQL/16/bin:$PATH"
 
 COPY ./requirements.txt /app/requirements.txt
 RUN pip install -Ur requirements.txt
@@ -48,11 +46,12 @@ RUN pip install -Ur requirements.txt
 # Switch to the non-privileged user to run the application.
 USER appuser
 
-FROM python:${PYTHON_VERSION}-slim as runner
+FROM python:${PYTHON_VERSION}-slim
+
 WORKDIR /app/
 COPY --from=compiler /opt/venv /opt/venv
 
 # Enable venv
 ENV PATH="/opt/venv/bin:$PATH"
 COPY . /app/
-CMD ["python", "src/main.py", ]
+CMD "python /app/src/main.py"

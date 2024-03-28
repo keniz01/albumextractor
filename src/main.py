@@ -7,7 +7,6 @@ from sqlalchemy import UniqueConstraint, create_engine, Column, Integer, String
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import declarative_base
 import pandas as pd
-from utilities import DateTimeUtilities as utils
 from dotenv import load_dotenv
 import os
 from time import time
@@ -46,6 +45,20 @@ class Song(Base):
     __table_args__ = (UniqueConstraint('artist_name', 'album_title', 'track_title'),)
  
 Base.metadata.create_all(engine)
+
+def format_duration(total_length: float) -> str:
+    
+    minutes, seconds = divmod(total_length, 60)
+    hours, minutes = divmod(minutes, 60)
+
+    seconds = round(seconds)
+    minutes = round(minutes)
+    hours = round(hours)        
+    
+    if hours == 0:
+        return "%02d:%02d" % (minutes, seconds)
+    
+    return "%02d:%02d:%02d" % (hours, minutes, seconds)
 
 def sanitize_data(data, data_type):
     '''
@@ -108,6 +121,7 @@ def run():
             "track_year": tag["TORY"].text[0] if "TORY" in tag else 0,        
         }
 
+        sampe: list[int] = ['a',2, "23"]
         albums.append(album)
 
     print("DONE")
