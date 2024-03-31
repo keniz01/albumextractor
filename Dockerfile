@@ -54,4 +54,4 @@ COPY --from=compiler /opt/venv /opt/venv
 # Enable venv
 ENV PATH="/opt/venv/bin:$PATH"
 COPY . /app/
-CMD "python /app/src/main.py"
+CMD python src/main.py ~/Downloads/Carlene_Davis_Come_To_Me_Softly
