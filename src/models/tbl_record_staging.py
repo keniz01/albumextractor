@@ -1,8 +1,10 @@
 from sqlalchemy import Column, Integer, String, UniqueConstraint
-from main import Base
+from constants.table_constants import TBL_RECORD_IMPORT
+from sqlalchemy.orm import declarative_base
 
-class Song(Base):
-    __tablename__ = 'tbl_song'
+Base = declarative_base
+class RecordStagingTable(Base):
+    __tablename__ = TBL_RECORD_IMPORT
 
     id = Column(Integer, primary_key=True, autoincrement="auto")
     artist_name = Column(String, nullable=True)
@@ -12,4 +14,6 @@ class Song(Base):
     genre_name = Column(String, nullable=True)
     track_position = Column(Integer, nullable=True)
     track_year = Column(Integer, nullable=True)
+    album_label = Column(String, nullable=True)
+
     __table_args__ = (UniqueConstraint('artist_name', 'album_title', 'track_title'),)

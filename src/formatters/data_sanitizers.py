@@ -9,7 +9,7 @@ def sanitize_data(data, data_type):
         return strip_characters(data) if(data) else ""
     elif data_type is int or data_type is float:
         try:
-            return float(data) if data_type is float else int(data) if data_type is int else 0
+            return float(str(data)) if data_type is float else int(str(data)) if data_type is int else 0
         except:
             return 0.0 if data_type is float else 0
     else:

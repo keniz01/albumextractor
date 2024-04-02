@@ -17,7 +17,8 @@ def model_to_table_mapper(audio_records: list[AudioRecord]):
             "track_length": duration_formatter(sanitize_data(audio_record.track_length, float)),
             "genre_name": sanitize_data(audio_record.genre_name, str),
             "track_position": sanitize_data(audio_record.track_position, int),
-            "track_year": sanitize_data(audio_record.track_year, int)
+            "track_year": sanitize_data(audio_record.track_year, int),
+            "album_label": sanitize_data(audio_record.album_label, str)
         }  
 
         records.append(record)
