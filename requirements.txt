@@ -25,7 +25,6 @@ pendulum==3.0.0
 platformdirs==4.2.0
 pluggy==1.4.0
 pprintpp==0.4.0
-psycopg2==2.9.9
 psycopg2-binary==2.9.9
 pymediainfo==6.1.0
 pytaglib==3.0.0

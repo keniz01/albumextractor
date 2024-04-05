@@ -23,4 +23,4 @@ def model_to_table_mapper(audio_records: list[AudioRecord]):
 
         records.append(record)
 
-    return records       
+    return records

@@ -13,3 +13,8 @@ Environment variables
 ---------------------
 Rename .example_env to .env
 Change the variable values to match actual database settings.
+
+Docker
+-------
+docker build -t album_extractor .
+docker run -it album_extractor /bin/bash
