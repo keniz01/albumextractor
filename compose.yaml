@@ -10,4 +10,4 @@ services:
       - PORT=$PORT
       - DATABASE=$DATABASE
     volumes:
-      - c:/Users/kkiiza/Downloads/tracks:/data/tracks
+      - ~/Downloads/Carlene_Davis_Come_To_Me_Softly:/data/tracks

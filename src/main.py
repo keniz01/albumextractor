@@ -16,18 +16,28 @@ def get_files_from_all_folders(folder_root: Path) -> chain[Path]:
 
 if __name__ == "__main__":
     folder_root = get_folder_root()
-    print(f"\n1. Extracting files from {folder_root.absolute()} .............", end="")
+    print(f"\n1. Extracting files from {folder_root.absolute()} .............", end=" ")
     start_time = time()
     files = get_files_from_all_folders(folder_root)
-    print("DONE")
 
-    print("\n2. Extracting tags from files.......... ", end="")
+    file_count = len(list(files))
+    if file_count == 0:
+        print("\n2. 0 files found.")
+        sys.exit()
+
+    print(f'Found {file_count} files')
+
+    print("\n2. Extracting tags from files .......... ", end=" ")
     audio_tags = extract_tags_from_files(files)
     print("DONE")  
 
-    print("\n3. Saving to database ........ ", end="")
+    print("\n3. Saving to database ........ ", end=" ")
     saved_rows = save_tags_to_database(audio_tags)
-    print("DONE") if saved_rows > 0 else print("Nothing to save")
+    if saved_rows > 0:
+        print("DONE") 
+    else:
+        print("0 records saved")
+        sys.exit()
 
     stop_time = time()
-    print(f"\nProcessed {saved_rows} files in {duration_formatter(stop_time - start_time)} minutes.")
+    print(f"\n4. Processed {saved_rows} files in {duration_formatter(stop_time - start_time)} minutes.")
