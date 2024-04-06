@@ -4,10 +4,10 @@ services:
       context: .
     command: python src/main.py /data/tracks
     environment:
-      - USERNAME=postgres
-      - PASSWORD=postgres
+      - USERNAME=$USERNAME
+      - PASSWORD=$PASSWORD
       - SERVER=host.docker.internal
-      - PORT=5432
-      - DATABASE=analysis
+      - PORT=$PORT
+      - DATABASE=$DATABASE
     volumes:
       - c:/Users/kkiiza/Downloads/tracks:/data/tracks
