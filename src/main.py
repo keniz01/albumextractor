@@ -2,8 +2,8 @@ from itertools import chain
 from pathlib import Path
 import sys
 from time import time
-from database.extract_tags_from_files import extract_tags_from_files
-from database.save_tags_to_database import save_tags_to_database
+from src.id3_tag_extractors.extract_tags_from_files import extract_tags_from_files
+from database_helpers.save_tags_to_database import save_tags_to_database
 from formatters.time_formatter import duration_formatter
 
 def get_folder_root() -> Path:
@@ -19,13 +19,7 @@ if __name__ == "__main__":
     print(f"\n1. Extracting files from {folder_root.absolute()} .............", end=" ")
     start_time = time()
     files = get_files_from_all_folders(folder_root)
-
-    # file_count = len(list(files))
-    # if file_count == 0:
-    #     print("\n2. 0 files found.")
-    #     sys.exit()
-
-    # print(f'Found {file_count} files')
+    print('DONE')
 
     print("\n2. Extracting tags from files .......... ", end=" ")
     audio_tags = extract_tags_from_files(files)

@@ -1,7 +1,7 @@
 from itertools import chain
 from pathlib import Path
-from mappers.model_to_table_mapper import model_to_table_mapper
-from metadata_helpers.audio_metadata_extracters import get_audio_meta_data
+from data_mappers.model_to_table_mapper import model_to_table_mapper
+from src.id3_tag_extractors.audio_metadata_extracters import get_audio_meta_data
 from models.audio_record import AudioRecord
 import concurrent.futures
 
