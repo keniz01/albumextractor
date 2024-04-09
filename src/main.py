@@ -20,12 +20,12 @@ if __name__ == "__main__":
     start_time = time()
     files = get_files_from_all_folders(folder_root)
 
-    file_count = len(list(files))
-    if file_count == 0:
-        print("\n2. 0 files found.")
-        sys.exit()
+    # file_count = len(list(files))
+    # if file_count == 0:
+    #     print("\n2. 0 files found.")
+    #     sys.exit()
 
-    print(f'Found {file_count} files')
+    # print(f'Found {file_count} files')
 
     print("\n2. Extracting tags from files .......... ", end=" ")
     audio_tags = extract_tags_from_files(files)
