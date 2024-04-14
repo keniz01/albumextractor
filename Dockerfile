@@ -26,7 +26,6 @@ RUN adduser \
 RUN python -m venv /opt/venv
 # Enable venv
 ENV PATH="/opt/venv/bin:$PATH"
-# ENV PATH="$PATH:/Library/PostgreSQL/16/bin"
 
 RUN python -m pip install --upgrade pip
 RUN apt-get update && apt-get install libpq-dev gcc -y
